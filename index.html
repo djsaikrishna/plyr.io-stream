@@ -8,21 +8,38 @@
     <style>
         body {
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #000; /* AMOLED black background */
+            background-color: #000; /* Amoled black */
+            color: #fff; /* White text for better visibility on black */
+            font-family: Arial, sans-serif; /* Optional: Set a font for better text rendering */
         }
 
         #video-container {
             position: relative;
-            width: 80%;
-            max-width: 800px;
-            margin: 0 auto; /* Center the container */
+            width: 100%; /* Full width */
         }
 
-        /* Media query for smaller screens (e.g., mobile devices) */
+        #video-player {
+            width: 100%;
+            height: auto;
+        }
+
+        #url-input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        /* Responsive styles for smaller screens */
         @media only screen and (max-width: 600px) {
             #video-container {
                 width: 100%;
@@ -32,31 +49,53 @@
 </head>
 <body>
     <div id="video-container">
-        <video id="video" controls>
+        <video id="video-player" controls>
             Your browser does not support the video tag.
         </video>
+        <div id="error-message"></div>
     </div>
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const player = new Plyr('#video', {
-                controls: ['rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'],
-                iconUrl: 'https://cdn.plyr.io/3.7.8/plyr.svg', // Use Plyr's SVG sprite
-                invertTime: false, // Set to true to display time left rather than elapsed
+            const videoPlayer = new Plyr('#video-player', {
+                controls: ['rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen', 'quality'],
             });
 
-            // Get the URL parameters
+            const errorMessage = document.getElementById('error-message');
+
+            // Get the video URL from the query parameters
             const urlParams = new URLSearchParams(window.location.search);
             const videoUrl = urlParams.get('url');
 
-            // Update video source if URL parameter is provided
+            // Set the video source if a URL is provided
             if (videoUrl) {
-                const source = document.createElement('source');
-                source.src = videoUrl;
-                source.type = 'video/mp4';
-                player.source = source;
-                player.restart(); // Restart the player with the new source
+                if (videoUrl.endsWith('.m3u8')) {
+                    // HLS URL
+                    if (Hls.isSupported()) {
+                        const hls = new Hls();
+                        hls.loadSource(videoUrl);
+                        hls.attachMedia(videoPlayer.media);
+                    } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                        videoPlayer.src = videoUrl;
+                    } else {
+                        errorMessage.innerText = 'HLS not supported on this browser.';
+                    }
+                } else {
+                    // MP4 URL
+                    videoPlayer.source = {
+                        type: 'video',
+                        sources: [
+                            {
+                                src: decodeURIComponent(videoUrl),
+                                type: 'video/mp4',
+                            },
+                        ],
+                    };
+                }
+            } else {
+                errorMessage.innerText = 'Invalid or missing video URL.';
             }
         });
     </script>
