@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plyr Video Player</title>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000; /* AMOLED black background */
+        }
+
+        #video-container {
+            position: relative;
+            width: 80%;
+            max-width: 800px;
+            margin: 0 auto; /* Center the container */
+        }
+
+        /* Media query for smaller screens (e.g., mobile devices) */
+        @media only screen and (max-width: 600px) {
+            #video-container {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <video id="video" controls>
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const player = new Plyr('#video', {
+                controls: ['rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'],
+                iconUrl: 'https://cdn.plyr.io/3.7.8/plyr.svg', // Use Plyr's SVG sprite
+                invertTime: false, // Set to true to display time left rather than elapsed
+            });
+
+            // Get the URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoUrl = urlParams.get('url');
+
+            // Update video source if URL parameter is provided
+            if (videoUrl) {
+                const source = document.createElement('source');
+                source.src = videoUrl;
+                source.type = 'video/mp4';
+                player.source = source;
+                player.restart(); // Restart the player with the new source
+            }
+        });
+    </script>
+</body>
+</html>
