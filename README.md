@@ -2,4 +2,4 @@
 
 
 
-!example.com/?url=YourVideoLink
+# example.com/?url=YourVideoLink
