@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,6 +21,7 @@
         #video-container {
             position: relative;
             width: 100%; /* Full width */
+            text-align: center; /* Center the button */
         }
 
         #video-player {
@@ -39,6 +41,21 @@
             margin-top: 10px;
         }
 
+        #download-button {
+            display: none;
+            margin-top: 10px;
+        }
+
+        /* Center the button */
+        #download-button button {
+            padding: 10px 20px;
+            background-color: #3498db; /* Button color */
+            color: #fff; /* Button text color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         /* Responsive styles for smaller screens */
         @media only screen and (max-width: 600px) {
             #video-container {
@@ -47,12 +64,16 @@
         }
     </style>
 </head>
+
 <body>
     <div id="video-container">
         <video id="video-player" controls>
             Your browser does not support the video tag.
         </video>
         <div id="error-message"></div>
+        <a id="download-button" download>
+            <button>Download Video</button>
+        </a>
     </div>
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
@@ -64,6 +85,7 @@
             });
 
             const errorMessage = document.getElementById('error-message');
+            const downloadButton = document.getElementById('download-button');
 
             // Get the video URL from the query parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -77,8 +99,14 @@
                         const hls = new Hls();
                         hls.loadSource(videoUrl);
                         hls.attachMedia(videoPlayer.media);
+                        // Show download button for HLS streams
+                        downloadButton.style.display = 'block';
+                        downloadButton.href = videoUrl;
                     } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
                         videoPlayer.src = videoUrl;
+                        // Show download button for HLS streams
+                        downloadButton.style.display = 'block';
+                        downloadButton.href = videoUrl;
                     } else {
                         errorMessage.innerText = 'HLS not supported on this browser.';
                     }
@@ -93,6 +121,9 @@
                             },
                         ],
                     };
+                    // Show download button for MP4 videos
+                    downloadButton.style.display = 'block';
+                    downloadButton.href = decodeURIComponent(videoUrl);
                 }
             } else {
                 errorMessage.innerText = 'Invalid or missing video URL.';
@@ -100,4 +131,5 @@
         });
     </script>
 </body>
+
 </html>
